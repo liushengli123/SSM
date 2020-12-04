@@ -1,0 +1,42 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd">
+    <!-- 开启注解扫描 -->
+    <context:component-scan base-package="ssm.item.controller"/>
+
+    <!--    内部资源视图解析器-->
+    <bean id="internalResourceViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <!-- 前缀（目录） -->
+        <property name="prefix" value="/WEB-INF/pages/"/>
+        <!-- 后缀 -->
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!--    配置文件上传解析器-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="utf-8"/>
+        <property name="maxUploadSize" value="5000000"/>
+    </bean>
+    <!-- 开启SpringMVC框架注解的支持 -->
+    <mvc:annotation-driven/>
+
+    <!--    开放所有资源-->
+    <mvc:default-servlet-handler/>
+
+    <!--   配置拦截器-->
+<!--    <mvc:interceptors>-->
+<!--        <mvc:interceptor>-->
+<!--            &lt;!&ndash;            配置对那些资源进行拦截&ndash;&gt;-->
+<!--            <mvc:mapping path="/**"/>-->
+<!--            &lt;!&ndash;            配置拦截器类&ndash;&gt;-->
+<!--            <bean class="com.springmvc.Interceptor.Interceptor"/>-->
+<!--        </mvc:interceptor>-->
+<!--    </mvc:interceptors>-->
+</beans>
