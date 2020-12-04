@@ -3,6 +3,13 @@
 <html>
 <head>
     <title>Title</title>
+    <style type="text/css">
+        .psm{
+            position: absolute;
+            right: 100px;
+            float: right;
+        }
+    </style>
 </head>
 <body>
 <table border="1">
@@ -37,5 +44,12 @@
         </tr>
     </c:forEach>
 </table>
+<div class="psm">
+    <p>当前页：${page.pageNum}</p>
+    <span>页码：</span>
+    <c:forEach items="${page.navigatepageNums}" var="num">
+        <a href="http://localhost:8080/test?pnum=${num}">${num}</a>
+</c:forEach>
+</div>
 </body>
 </html>
