@@ -4,6 +4,10 @@
         "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
 <!--    分页查询插件-->
+    <typeAliases>
+        <typeAlias type="ssm.item.pojo.Material" alias="material"/>
+        <typeAlias type="ssm.item.pojo.Sort" alias="sort"/>
+    </typeAliases>
     <plugins>
         <plugin interceptor="com.github.pagehelper.PageHelper">
             <property name="dialect" value="mysql"/>
