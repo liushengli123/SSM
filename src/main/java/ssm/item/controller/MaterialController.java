@@ -1,8 +1,5 @@
 package ssm.item.controller;
 
-import com.alibaba.excel.EasyExcelFactory;
-import com.alibaba.excel.ExcelWriter;
-import com.alibaba.excel.metadata.Sheet;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +14,7 @@ import ssm.item.pojo.Sort;
 import ssm.item.service.MaterialService;
 
 import javax.validation.Valid;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.*;
 
 @Controller
@@ -28,15 +22,14 @@ public class MaterialController {
     @Autowired
     private MaterialService materialService;
 
-//   查询所有
-    @RequestMapping("list")
-    public String findAll(@RequestParam(value = "pn",defaultValue = "1") Integer pn,Model model){
+//    加载所有数据
+    @RequestMapping("/list")
+    @ResponseBody
+    public Msg findAll(@RequestParam(value = "pn",defaultValue = "1") Integer pn){
         PageHelper.startPage(pn,3);
         List<Material> materialList = materialService.findAll();
         PageInfo pageInfo=new PageInfo(materialList,3);
-        model.addAttribute("pageInfo",pageInfo);
-        model.addAttribute("materials",materialList);
-        return "index";
+        return Msg.success().add("pageInfo",pageInfo);
     }
 
 //    通过id查询
@@ -61,38 +54,20 @@ public class MaterialController {
     public Msg add(@Valid Material material,BindingResult result) {
         int b=material.getStart_time().compareTo(material.getEnd_time());
         if (result.hasErrors()) {
-            //校验失败，应该返回失败，在模态框中显示校验失败的错误信息
             return getMsg(result);
-        } else if (b>=0){
+        }
+        else if (b>=0){
             return Msg.fail().add("time","起始时间应在截止时间之前");
-        } else {
-            List<Material> materials = materialService.findAll();
-            Iterator<Material> iterator = materials.iterator();
-            int max = 0;
-            while (iterator.hasNext()) {
-                int id = iterator.next().getId();
-                if (id > max) {
-                    max = id;
-                }
-            }
-            String code = materialService.findById(max).getCode();
-            Integer codes = 1 + Integer.parseInt(code);
-            material.setCode(codes.toString());
+        }
+        else {
             materialService.save(material);
             return Msg.success();
         }
     }
 
-//    删除
-    @RequestMapping("/delete")
-    @ResponseBody
-    public Msg delete(@RequestParam(name = "id") String id){
-        materialService.delete(id);
-        return Msg.success();
-        }
 
-//  批量删除
-    @RequestMapping("delete/{ids}")
+//  批量删除与单个删除整合在一起
+    @RequestMapping(value = "/delete/{ids}",method = RequestMethod.DELETE)
     @ResponseBody
     public Msg deleteByIds(@PathVariable("ids") String ids) {
         List<Integer> del_ids = new ArrayList<Integer>();
@@ -110,7 +85,7 @@ public class MaterialController {
     }
 
 //    修改
-    @RequestMapping(value = "/update/{id}",method = RequestMethod.POST)
+    @RequestMapping(value = "/update/{id}",method = RequestMethod.PUT)
     @ResponseBody
     public Msg update(@PathVariable("id") Integer id,@Valid Material material,BindingResult result){
         int b=material.getStart_time().compareTo(material.getEnd_time());
@@ -120,8 +95,7 @@ public class MaterialController {
             return Msg.fail().add("time","起始时间应在截止时间之前");
         }
         else {
-            material.setId(id);
-            materialService.update(material);
+            materialService.update(material,id);
             return Msg.success();
         }
     }
@@ -136,17 +110,11 @@ public class MaterialController {
         return Msg.fail().add("errorFields",map);
     }
 
+//    文件导出
     @RequestMapping("/excel")
     @ResponseBody
     public Msg outExcel() throws IOException {
-        List<Material> materials = materialService.findAll();
-        OutputStream out=new FileOutputStream(File.createTempFile("test",".xlsx", new File("D:\\test")));
-        ExcelWriter writer = EasyExcelFactory.getWriter(out);
-        Sheet sheet = new Sheet(1,0, Material.class);
-        sheet.setSheetName("第一个sheet");
-        writer.write(materials,sheet);
-        writer.finish();
-        out.close();
+        materialService.outexcel();
         return Msg.success();
     }
 
@@ -155,7 +123,6 @@ public class MaterialController {
     @ResponseBody
     public Msg sorts(Sort sort){
         List<Material> materialList=materialService.sorts(sort);
-        System.out.println(materialList);
         return Msg.success().add("materials",materialList);
     }
 }

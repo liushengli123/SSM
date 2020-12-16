@@ -3,12 +3,13 @@ package ssm.item.pojo;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.metadata.BaseRowModel;
 import org.springframework.format.annotation.DateTimeFormat;
+import ssm.item.validation.NotDate;
+
 import javax.validation.constraints.*;
 import java.util.Date;
 
 public class Material extends BaseRowModel {
-//    @ExcelProperty(value = "id",index=0)
-    private int id;
+    private Integer id;
     @ExcelProperty(value = "code",index=0)
     private String code;
     @ExcelProperty(value = "uom",index=1)
@@ -17,7 +18,6 @@ public class Material extends BaseRowModel {
     @Pattern(regexp ="(^[a-zA-Z0-9_-]{6,16}$)|(^[\u2E80-\u9FFF]{2,5})",message ="描述必须是2-5位中文或者6-16位英文和数字的组合")
     private String description;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-//    @NotNull(message = "时间不能为空")
     @ExcelProperty(value = "start_time",index=3)
     private Date start_time;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -25,15 +25,10 @@ public class Material extends BaseRowModel {
     private Date end_time;
     @ExcelProperty(value = "flag",index=5)
     private int flag;
-//    @ExcelProperty(value = "version",index=7)
     private int version;
-//    @ExcelProperty(value = "create_time",index=8)
     private Date create_time;
-//    @ExcelProperty(value = "create_user",index=9)
     private String create_user;
-//    @ExcelProperty(value = "update_time",index=10)
     private Date update_time;
-//    @ExcelProperty(value = "update_user",index=11)
     private String update_user;
 
     public Material() {

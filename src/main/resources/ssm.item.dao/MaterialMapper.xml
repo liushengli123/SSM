@@ -15,7 +15,7 @@
     <select id="findByAny" parameterType="material" resultType="material">
         select * from ssm_item
         <where>
-        <if test="description != null">
+        <if test="description != null and description!=''">
             description LIKE concat('%',#{description},'%') and
         </if>
         <if test="code != null and code!=''">
@@ -51,11 +51,11 @@
        </choose>
    </select>
     <insert id="save" parameterType="material">
-        insert into ssm_item(code,description,uom,start_time,end_time,flag)
-        values(#{code},#{description},#{uom},#{start_time},#{end_time},#{flag})
+        insert into ssm_item(id,code,description,uom,start_time,end_time,flag)
+        values(#{id},#{code},#{description},#{uom},#{start_time},#{end_time},#{flag})
     </insert>
 
-    <delete id="delete" parameterType="java.lang.String">
+    <delete id="delete" parameterType="java.lang.Integer">
         delete from ssm_item where id=#{id}
     </delete>
 
@@ -83,6 +83,9 @@
             </if>
             <if test="flag != null">
                 flag=#{flag},
+            </if>
+            <if test="version != null">
+                version=#{version},
             </if>
         </trim>
         where id=#{id}

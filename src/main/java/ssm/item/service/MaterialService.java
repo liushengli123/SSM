@@ -3,6 +3,7 @@ package ssm.item.service;
 import ssm.item.pojo.Material;
 import ssm.item.pojo.Sort;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface MaterialService {
@@ -11,7 +12,8 @@ public interface MaterialService {
      List<Material> findAll();
      Material findById(Integer id);
      List<Material> findByAny(Material material);
-     void delete(String id);
+     void delete(Integer id);
      void deleteByIds(List<Integer> ids);
-     void update(Material material);
+     void update(Material material,Integer id);
+     void outexcel() throws IOException;
 }

@@ -19,7 +19,7 @@ public interface MaterialMapper {
 
    List<Material> findByAny(Material material);
 
-   void delete(String id);
+   void delete(Integer id);
 
    void deleteByIds(@Param("ids") List<Integer> ids);
 

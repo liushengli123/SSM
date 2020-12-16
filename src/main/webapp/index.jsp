@@ -8,12 +8,12 @@
           pageContext.setAttribute("APP_PATH", request.getContextPath());
       %>
       <script src="https://cdn.jsdelivr.net/npm/jutils-src"></script>
-      <script type="text/javascript" src="${APP_PATH}/resources/scripts/jquery-1.12.4.min.js"></script>
-      <link href="../../static/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
-      <script src="../../static/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
-    <link href="../../resources/css/axure_rp_page.css" type="text/css" rel="stylesheet"/>
-    <link href="../../data/styles.css" type="text/css" rel="stylesheet"/>
-    <link href="../../files/index/styles.css" type="text/css" rel="stylesheet"/>
+      <script type="text/javascript" src="resources/scripts/jquery-1.12.4.min.js"></script>
+      <link href="static/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+      <script src="static/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+    <link href="resources/css/axure_rp_page.css" type="text/css" rel="stylesheet"/>
+    <link href="data/styles.css" type="text/css" rel="stylesheet"/>
+    <link href="files/index/styles.css" type="text/css" rel="stylesheet"/>
     <style>
         #tbl{
           border-collapse: collapse;
@@ -165,7 +165,7 @@
       </div>
       <!-- Title分割线 (水平线) -->
       <div id="u2" class="ax_default line" data-label="Title分割线">
-        <img id="u2_img" class="img " src="../../images/index/title____u2.png"/>
+        <img id="u2_img" class="img " src="images/index/title____u2.png"/>
         <!-- Unnamed () -->
         <div id="u3" class="text" style="display: none; visibility: hidden">
           <p><span></span></p>
@@ -295,72 +295,34 @@
                   </tr>
                 </thead>
                 <tbody>
-                <c:forEach items="${materials}" var="material">
-                    <tr id="${material.id}" name="list_select">
-                        <td><input type="checkbox" class="check_item"/></td>
-                        <td>${material.code}</td>
-                        <td style="overflow: hidden" title="${material.description}">${material.description}</td>
-                        <td>${material.uom}</td>
-                        <td><fmt:formatDate value="${material.start_time}" pattern="yyyy-MM-dd" /></td>
-                        <td><fmt:formatDate value="${material.end_time}" pattern="yyyy-MM-dd" /></td>
-                        <td>
-                            <c:if test="${material.flag==1}">
-                                <span>是</span>
-                            </c:if>
-                            <c:if test="${material.flag==0}">
-                                <span>否</span>
-                            </c:if>
-                        </td>
-                        <td>
-                            <button type="button" onclick="member_edit(this,${material.id})" href="javascript:;" class="btn btn-info btn-sm edit_btn" data-toggle="modal" data-target="#myUpdateModal" id="edit_btn">编辑</button>
-                            <button type="button" onclick="member_del(this,${material.id})" href="javascript:;" class="btn btn-danger btn-sm" id="delete_btn">删除</button>
-                        </td>
-                    </tr>
-                </c:forEach>
+
                 </tbody>
             </table>
       </div>
 
       <div id="u86" class="ax_default button" data-label="新建按钮">
-          <!-- Unnamed () -->
          <button id="btn1" type="button" class="btn-sm btn btn-primary btn-lg" data-toggle="modal" data-target="#myAddModal">
                   新增
               </button>
       </div>
 
       <!-- 分页控件 (图片) -->
-      <div id="u88" style="position:relative;left:950px;top: 450px">
-              <!--分页文字信息  --><div style="right: 0px;margin-right: 0px">
-                  <nav aria-label="Page navigation">
-                      <ul class="pagination">
-                          <li><a href="list?pn=1">首页</a></li>
-                          <c:if test="${pageInfo.hasPreviousPage }">
-                              <li><a href="list?pn=${pageInfo.pageNum-1}"
-                                     aria-label="Previous"> <span aria-hidden="true">&laquo;</span>
-                              </a></li>
-                          </c:if>
-                          <c:forEach items="${pageInfo.navigatepageNums }" var="page_Num">
-                              <c:if test="${page_Num == pageInfo.pageNum }">
-                                  <li class="active"><a href="#">${page_Num }</a></li>
-                              </c:if>
-                              <c:if test="${page_Num != pageInfo.pageNum }">
-                                  <li><a href="list?pn=${page_Num }">${page_Num }</a></li>
-                              </c:if>
-                          </c:forEach>
-                          <c:if test="${pageInfo.hasNextPage }">
-                              <li><a href="list?pn=${pageInfo.pageNum+1 }"
-                                     aria-label="Next"> <span aria-hidden="true">&raquo;</span>
-                              </a></li>
-                          </c:if>
-                          <li><a href="list?pn=${pageInfo.pages}">末页</a></li>
-                      </ul>
-                  </nav>
-      </div>
+      <div id="u88" style="position:relative;left:700px;top: 450px">
+            <!-- 显示分页信息 -->
+             <div class="row" id="pageinfo">
+                <!--分页文字信息  -->
+                <div class="col-md-6" id="page_info_area"></div>
+                <!-- 分页条信息 -->
+                <div class="col-md-6" id="page_nav_area">
+
+                </div>
+            </div>
           <form id="sort_select">
               排序字段:<select id="sort">
                         <option value="code">code</option>
                         <option value="description">description</option>
                         <option value="flag">flag</option>
+                        <option value="start_time">start_time</option>
                      </select>
               排序方式：<select id="order">
                         <option value="desc">desc</option>
@@ -373,7 +335,161 @@
 
 
     <script type="text/javascript">
-<%--        添加按钮绑定模态框--%>
+        var totalRecord,currentPage;
+        //加载首页
+        $(function () {
+            to_page(1);
+        })
+        //页面的跳转
+        function to_page(pn) {
+            $.ajax({
+                url: "/list",
+                data: "pn="+pn,
+                type: "GET",
+                success: function (result) {
+                    //1、解析并显示员工数据
+                    build_emps_table(result);
+                    //2、解析并显示分页信息
+                    build_page_info(result);
+                    //3、解析显示分页条数据
+                    build_page_nav(result);
+                }
+            })
+        }
+        function createTable(result){
+            $("#tbl tbody").empty();
+            var mts = result.extend.materials;
+            $.each(mts, function (index, item) {
+                var checkBoxTd = $("<td><input type='checkbox' class='check_item'/></td>");
+                var code = $("<td></td>").append(item.code);
+                var description = $("<td></td>").append(item.description);
+                var uom = $("<td></td>").append(item.uom);
+                var start_time = $("<td></td>").append(jutils.formatDate(new Date(item.start_time), "yyyy-MM-dd"));
+                var end_time = $("<td></td>").append(jutils.formatDate(new Date(item.end_time), "yyyy-MM-dd"));
+                var flag = $("<td></td>").append(item.flag == "0" ? "否" : "是");
+                var editBtn = $("<button></button>").addClass("btn btn-info btn-sm edit_btn").append("编辑");
+                //为编辑按钮添加一个自定义的属性，来表示当前员工id
+                editBtn.attr("edit-id",item.id);
+                var delBtn = $("<button></button>").addClass("btn btn-danger btn-sm delete_btn").append("删除");
+                //为删除按钮添加一个自定义的属性来表示当前删除的员工id
+                delBtn.attr("del-id",item.id);
+                var btnTd = $("<td></td>").append(editBtn).append(" ").append(delBtn);
+                $("<tr></tr>").append(checkBoxTd)
+                    .append(code)
+                    .append(description)
+                    .append(uom)
+                    .append(start_time)
+                    .append(end_time)
+                    .append(flag)
+                    .append(btnTd)
+                    .appendTo("#tbl tbody");
+            });
+        }
+        function build_emps_table(result){
+            $("#tbl tbody").empty();
+            var mts = result.extend.pageInfo.list;
+            $.each(mts, function (index, item) {
+                var checkBoxTd = $("<td><input type='checkbox' class='check_item'/></td>");
+                var code = $("<td></td>").append(item.code);
+                var description = $("<td></td>").append(item.description);
+                var uom = $("<td></td>").append(item.uom);
+                var start_time = $("<td></td>").append(jutils.formatDate(new Date(item.start_time), "yyyy-MM-dd"));
+                var end_time = $("<td></td>").append(jutils.formatDate(new Date(item.end_time), "yyyy-MM-dd"));
+                var flag = $("<td></td>").append(item.flag == "0" ? "否" : "是");
+                var editBtn = $("<button></button>").addClass("btn btn-info btn-sm edit_btn").append("编辑");
+                //为编辑按钮添加一个自定义的属性，来表示当前员工id
+                editBtn.attr("edit-id",item.id);
+                var delBtn = $("<button></button>").addClass("btn btn-danger btn-sm delete_btn").append("删除");
+                //为删除按钮添加一个自定义的属性来表示当前删除的员工id
+                delBtn.attr("del-id",item.id);
+                var btnTd = $("<td></td>").append(editBtn).append(" ").append(delBtn);
+                $("<tr></tr>").append(checkBoxTd)
+                    .append(code)
+                    .append(description)
+                    .append(uom)
+                    .append(start_time)
+                    .append(end_time)
+                    .append(flag)
+                    .append(btnTd)
+                    .appendTo("#tbl tbody");
+            });
+        }
+        //解析显示分页信息
+        function build_page_info(result){
+            $("#page_info_area").empty();
+            $("#page_info_area").append("当前"+result.extend.pageInfo.pageNum+"页,总"+
+                result.extend.pageInfo.pages+"页,总"+
+                result.extend.pageInfo.total+"条记录");
+            totalRecord = result.extend.pageInfo.total;
+            currentPage = result.extend.pageInfo.pageNum;
+        }
+        //解析显示分页条，点击分页要能去下一页....
+        function build_page_nav(result){
+            //page_nav_area
+            $("#page_nav_area").empty();
+            var ul = $("<ul></ul>").addClass("pagination");
+
+            //构建元素
+            var firstPageLi = $("<li></li>").append($("<a></a>").append("首页").attr("href","#"));
+            var prePageLi = $("<li></li>").append($("<a></a>").append("&laquo;"));
+            if(result.extend.pageInfo.hasPreviousPage == false){
+                firstPageLi.addClass("disabled");
+                prePageLi.addClass("disabled");
+            }else{
+                //为元素添加点击翻页的事件
+                firstPageLi.click(function(){
+                    to_page(1);
+                });
+                prePageLi.click(function(){
+                    to_page(result.extend.pageInfo.pageNum -1);
+                });
+            }
+
+            var nextPageLi = $("<li></li>").append($("<a></a>").append("&raquo;"));
+            var lastPageLi = $("<li></li>").append($("<a></a>").append("末页").attr("href","#"));
+            if(result.extend.pageInfo.hasNextPage == false){
+                nextPageLi.addClass("disabled");
+                lastPageLi.addClass("disabled");
+            }else{
+                nextPageLi.click(function(){
+                    to_page(result.extend.pageInfo.pageNum +1);
+                });
+                lastPageLi.click(function(){
+                    to_page(result.extend.pageInfo.pages);
+                });
+            }
+
+            //添加首页和前一页 的提示
+            ul.append(firstPageLi).append(prePageLi);
+            //1,2，3遍历给ul中添加页码提示
+            $.each(result.extend.pageInfo.navigatepageNums,function(index,item){
+
+                var numLi = $("<li></li>").append($("<a></a>").append(item));
+                if(result.extend.pageInfo.pageNum == item){
+                    numLi.addClass("active");
+                }
+                numLi.click(function(){
+                    to_page(item);
+                });
+                ul.append(numLi);
+            });
+            //添加下一页和末页 的提示
+            ul.append(nextPageLi).append(lastPageLi);
+
+            //把ul加入到nav
+            var navEle = $("<nav></nav>").append(ul);
+            navEle.appendTo("#page_nav_area");
+        }
+
+        //清空表单样式及内容
+        function reset_form(ele){
+            $(ele)[0].reset();
+            //清空表单样式
+            $(ele).find("*").removeClass("has-error has-success");
+            $(ele).find(".help-block").text("");
+        }
+
+        <%--        添加按钮绑定模态框--%>
         $("#btn1").click(function () {
             $('#empAddModal').modal({
                 backdrop:"static"
@@ -381,12 +497,7 @@
         });
         //提交按钮绑定事件
         $("#add_btn").click(function (){
-            var obj=new Object();
-            obj.description=$("#description").val();
-            obj.uom=$("#uom").val();
-            obj.start_time=$("#start").val();
-            obj.end_time=$("#end").val();
-            obj.flag=$(".add_flag:checked").val();
+            var obj=$(".modal-body form").serialize();
             console.log(obj);
             $.ajax({
                 url:"/add",
@@ -396,7 +507,7 @@
                 success:function (result){
                     if (result.code==100) {
                         $("#empAddModal").modal("hide");
-                        location.reload();
+                        to_page(currentPage);
                     }else if (result.extend.time!=null) {
                         alert(result.extend.time);}
                     else {
@@ -407,7 +518,8 @@
         });
 
         // 修改异步显示数据
-        function member_edit(obj,id){
+        $(document).on("click",".edit_btn",function (){
+            var id = $(this).attr("edit-id");
             $.ajax({
                 url:"/list/"+id,
                 type:"get",
@@ -422,30 +534,25 @@
                     $("#start1").val(start_time);
                     $("#end1").val(end_time);
                     $("#empUpdateModal input[name=flag]").val([materialdata.flag]);
+                    $("#add_btn1").attr("edit-id",materialdata.id);
                     $('#empUpdateModal').modal({
                         backdrop: "static"
                     })
                 }
             })
-        }
+        })
        // 修改提交
        $("#add_btn1").click(function () {
-           var id=$("#edit_id").val();
-           var obj=new Object();
-           obj.description=$("#description1").val();
-           obj.uom=$("#uom1").val();
-           obj.start_time=$("#start1").val();
-           obj.end_time=$("#end1").val();
-           obj.flag=$(".update_flag:checked").val();
+           var obj=$(".modal-body1 form").serialize();
            $.ajax({
-               url: "/update/"+id,
-               type: "POST",
+               url: "/update/"+$(this).attr("edit-id"),
+               type: "PUT",
                data: obj,
                dataType: 'JSON',
                success: function (result) {
                    if (result.code==100) {
                        $("#empUpdateModal").modal('hide');
-                       location.reload();
+                       to_page(currentPage);
                    }else if (result.extend.time!=null){
                        alert(result.extend.time);
                    }
@@ -472,23 +579,22 @@
         });
 
         //删除按钮绑定删除事件
-        function member_del(obj,id) {
+        $(document).on("click",".delete_btn",function () {
+            var id = $(this).attr("del-id");
             //发异步删除数据
             if (confirm("确定删除吗？")) {
                 $.ajax({
-                    type: "post",
-                    url: "/delete",
-                    data: {id: id},
-                    dataType: "json",
+                    type: "DELETE",
+                    url: "/delete/"+id,
                     success: function (result) {
                         if (result.code == 100) {
-                            $(obj).parents("tr").remove();
-                            location.reload();
+                            to_page(currentPage);
                         }
                     }
                 });
             }
-        }
+        })
+
     //    批量删除
         $("#ed").click(function () {
             var codes="";
@@ -498,13 +604,14 @@
             if(confirm("确定删除【"+codes+"】吗？")){
                     $.ajax({
                         url:"/delete/"+codes,
+                        type:"DELETE",
                         success:function (result) {
-                            location.reload();
-                        }
-
-                    })
-            }
-        })
+                            alert(result.msg);
+                            to_page(currentPage);
+                            }
+                        })
+                    }
+             })
 
     //    查询按钮绑定事件
         $("#select_btn").click(function () {
@@ -512,44 +619,16 @@
             material.code=$("#u6_input").val();
             material.description=$("#u9_input").val();
             material.uom=$("#u12_input").val();
-            // material.start_time=jutils.formatDate(new Date($("#u19_input").val()),"yyyy/MM/dd");
             material.start_time=$("#u19_input").val();
             material.end_time=$("#u22_input").val();
             material.flag=$("#u25_input").val();
-            console.log(material);
             $.ajax({
                 url:"/select",
                 data:material,
                 dataType:"JSON",
                 type:"POST",
                 success:function (result) {
-                    var mts = result.extend.materials;
-                    $("#tbl tbody").empty();
-                    $.each(mts, function (index, item) {
-                        var checkBoxTd = $("<td><input type='checkbox' class='check_item'/></td>");
-                        var code = $("<td></td>").append(item.code);
-                        var description = $("<td></td>").append(item.description);
-                        var uom = $("<td></td>").append(item.uom);
-                        var start_time=$("<td></td>").append(jutils.formatDate(new Date(item.start_time),"yyyy-MM-dd"));
-                        var end_time=$("<td></td>").append(jutils.formatDate(new Date(item.end_time),"yyyy-MM-dd"));
-                        var flag = $("<td></td>").append(item.flag == "0" ? "否" : "是");
-                        var editBtn =$("<button></button>").addClass("btn btn-info btn-sm edit_btn").append("编辑");
-                        //为编辑按钮添加一个自定义的属性，来表示当前员工id
-                        //  editBtn.addEventListener('click',member_edit(this,item.id));
-                        var delBtn =$("<button></button>").addClass("btn btn-danger btn-sm delete_btn").append("删除");
-                        //为删除按钮添加一个自定义的属性来表示当前删除的员工id
-                        //  delBtn.addEventListener('click',member_del(this,item.id));
-                        var btnTd = $("<td></td>").append(editBtn).append(" ").append(delBtn);
-                        $("<tr></tr>").append(checkBoxTd)
-                            .append(code)
-                            .append(description)
-                            .append(uom)
-                            .append(start_time)
-                            .append(end_time)
-                            .append(flag)
-                            .append(btnTd)
-                            .appendTo("#tbl tbody");
-                    });
+                    createTable(result);
                 }
             })
         });
@@ -558,8 +637,10 @@
             $("#u6_input").val("");
             $("#u9_input").val("");
             $("#u12_input").val("");
-            location.reload();
+            to_page(1);
         }
+
+        //文件导出按钮
         $("#btn2").click(function () {
             $.ajax({
                 url:"/excel",
@@ -570,6 +651,7 @@
                 }
             })
         })
+        //排序按钮
         $("#sort_save").click(function () {
             var obj=new Object();
              obj.sort=$("#sort").val();
@@ -580,7 +662,7 @@
                  dataType:"JSON",
                  type:"GET",
                  success:function (result) {
-                     location.reload();
+                     createTable(result);
                  }
              })
         })
