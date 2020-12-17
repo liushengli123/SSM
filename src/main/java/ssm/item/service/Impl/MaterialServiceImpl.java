@@ -71,13 +71,8 @@ public class MaterialServiceImpl implements MaterialService {
 
     @Transactional
     @Override
-    public void delete(Integer id) {
-            materialMapper.delete(id);
-    }
-
-    @Transactional
-    @Override
     public void deleteByIds(List<Integer> ids) {
+//        int a=1/0;
         materialMapper.deleteByIds(ids);
     }
 

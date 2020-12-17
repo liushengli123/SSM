@@ -55,10 +55,6 @@
         values(#{id},#{code},#{description},#{uom},#{start_time},#{end_time},#{flag})
     </insert>
 
-    <delete id="delete" parameterType="java.lang.Integer">
-        delete from ssm_item where id=#{id}
-    </delete>
-
     <delete id="deleteByIds" parameterType="list">
         delete from ssm_item where code in
         <foreach collection="ids" item="code" open="(" separator="," close=")">

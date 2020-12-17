@@ -12,7 +12,6 @@ public interface MaterialService {
      List<Material> findAll();
      Material findById(Integer id);
      List<Material> findByAny(Material material);
-     void delete(Integer id);
      void deleteByIds(List<Integer> ids);
      void update(Material material,Integer id);
      void outexcel() throws IOException;
